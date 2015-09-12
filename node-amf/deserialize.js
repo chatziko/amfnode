@@ -195,7 +195,7 @@ AMFDeserializer.prototype.readValue = function( version ){
 		case amf.AMF3_OBJECT:
 			return this.readObject( amf.AMF3 );
 		case amf.AMF3_DATE:
-			return this.readDate();
+			return this.readDate( amf.AMF3 );
 		case amf.AMF3_BYTE_ARRAY:
 			return this.readByteArray();
 		default:
@@ -217,7 +217,7 @@ AMFDeserializer.prototype.readValue = function( version ){
 		case amf.AMF0_STRICT_ARRAY:
 			return this.readStrictArray();
 		case amf.AMF0_DATE:
-			return this.readDate();	
+			return this.readDate( amf.AMF0 );
 		case amf.AMF0_OBJECT:
 			return this.readObject( amf.AMF0 );			
 		default:
@@ -354,22 +354,31 @@ AMFDeserializer.prototype.readObject = function( version ){
 
 
 /** */
-AMFDeserializer.prototype.readDate = function(){
+AMFDeserializer.prototype.readDate = function(version) {
 	var u, d;
-	// check if instance follows (U29O-ref)
-	var n = this.readU29();
-	if( n & 1 ){
+	if( version === amf.AMF0 ) {
 		// create and index a new date object
 		u = this.readDouble();
+		var timezone = this.readU16();	// ignore
 		d = new Date( u );
 		this.refObj.push( d );
-	}
-	else {
-		var idx = n >> 1;
-		if( this.refObj[idx] == null || ! this.refObj[idx] instanceof Date ){
-			throw new Error("No date object reference at index "+idx+", offset "+this.i);
+
+	} else {
+		// check if instance follows (U29O-ref)
+		var n = this.readU29();
+		if( n & 1 ){
+			// create and index a new date object
+			u = this.readDouble();
+			d = new Date( u );
+			this.refObj.push( d );
 		}
-		d = this.refObj[idx];
+		else {
+			var idx = n >> 1;
+			if( this.refObj[idx] == null || ! this.refObj[idx] instanceof Date ){
+				throw new Error("No date object reference at index "+idx+", offset "+this.i);
+			}
+			d = this.refObj[idx];
+		}
 	}
 	return d;
 }
