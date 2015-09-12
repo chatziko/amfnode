@@ -42,7 +42,7 @@ AMFPacket.prototype.addHeader = function( header, value ){
 	else {
 		this.nheaders++;
 	}
-	this.headers[header.name] = header.value;
+	this.headers[header.name] = header;
 	return header;
 };
 
