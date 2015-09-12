@@ -215,29 +215,38 @@ AMFSerializer.prototype.writeArray = function( value ){
 
 /** */
 AMFSerializer.prototype.writeObject = function( value ){
-	if( this.version !== amf.AMF3 ){
-		throw new Error("This library doesn't support AMF0 objects, use AMF3");
-	}
-	this.writeU8( amf.AMF3_OBJECT );
-	// support object references
-    var n = this.refObj.indexOf( value );
-    if( n !== -1 ){
-        return this.writeU29( n << 1 );
-    }
-	// else index object reference
-	this.refObj.push( value );
-	// flag with instance, no traits, no externalizable
-	this.writeU29( 11 );
-	this.writeUTF8('Object');
-	// write serializable properties
-	for( var s in value ){
-		if( typeof value[s] !== 'function' ){
-			this.writeUTF8(s);
-			this.writeValue( value[s] );
+	if( this.version == amf.AMF3 ){
+		this.writeU8( amf.AMF3_OBJECT );
+		// support object references
+		var n = this.refObj.indexOf( value );
+		if( n !== -1 ){
+			return this.writeU29( n << 1 );
 		}
+		// else index object reference
+		this.refObj.push( value );
+		// flag with instance, no traits, no externalizable
+		this.writeU29( 11 );
+		this.writeUTF8('Object');
+		// write serializable properties
+		for( var s in value ){
+			if( typeof value[s] !== 'function' ){
+				this.writeUTF8(s);
+				this.writeValue( value[s] );
+			}
+		}
+		// terminate dynamic props with empty string
+		return this.writeUTF8('');
+
+	} else { // AMF0
+		this.writeU8(3);
+		for(var k in value) {
+			this.writeUTF8(k);
+			this.writeValue(value[k]);
+		}
+		this.writeU8(0);
+		this.writeU8(0);
+		this.writeU8(9);
 	}
-	// terminate dynamic props with empty string
-	return this.writeUTF8('');
 }
 
 
