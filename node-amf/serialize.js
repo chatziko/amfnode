@@ -267,9 +267,9 @@ AMFSerializer.prototype.writeDate = function( d ){
 
 /** */
 AMFSerializer.prototype.writeNumber = function( value, writeMarker ){
-	// serialize as integers if possible
+	// serialize as integers if possible (AMF3 only)
 	var n = parseInt( value );
-	if( n === value && n >= 0 && n < 0x20000000 ){
+	if( this.version === amf.AMF3 && n === value && n >= 0 && n < 0x20000000 ){
 		return this.writeU29( value, writeMarker );
 	}
 	return this.writeDouble( value, writeMarker );
