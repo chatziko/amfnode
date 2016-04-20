@@ -111,7 +111,9 @@ AMFDeserializer.prototype.readU29 = function(){
     		break;
 		}
 	}
-	return n;
+	// we read up to 29bits in n, so its high 3 bits will be 0. For negative numbers, we
+	// need to fix them. Shifting >> preserves the sign bit so it does the job.
+	return (n << 3) >> 3;
 }
 
 
