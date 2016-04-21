@@ -260,9 +260,9 @@ AMFDeserializer.prototype.readArray = function(){
 	 	while( key = this.readUTF8(amf.AMF3) ){
 	 		a[key] = this.readValue(amf.AMF3);
 		}
-		// append dense values
+		// add dense values
 		for( var i = 0; i < len; i++ ){
-			a.push( this.readValue( amf.AMF3 ) );
+			a[i] = this.readValue( amf.AMF3 );
 		}
 	}
 	// else is reference index
